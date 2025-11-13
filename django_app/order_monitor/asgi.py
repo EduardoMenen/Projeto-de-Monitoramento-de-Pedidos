@@ -6,10 +6,8 @@ import orders.routing
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'order_monitor.settings')
 
-django_app = get_asgi_application()
-
 application = ProtocolTypeRouter({
-    "http": django_app,
+    "http": get_asgi_application(),
     "websocket": AuthMiddlewareStack(
         URLRouter(
             orders.routing.websocket_urlpatterns

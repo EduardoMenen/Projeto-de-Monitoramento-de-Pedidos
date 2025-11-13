@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Enviar Pedido</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .card {
+            background: white;
+            width: 450px;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #333;
+        }
+
+        label {
+            font-size: 14px;
+            color: #555;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-top: 6px;
+            margin-bottom: 18px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: #43A047;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #2E7D32;
+        }
+
+        .success {
+            margin-top: 15px;
+            padding: 10px;
+            background: #d4edda;
+            color: #155724;
+            border-radius: 6px;
+            text-align: center;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+{% csrf_token %}
+
+<div class="card">
+    <h2>Enviar Novo Pedido</h2>
+
+    <label for="produto">Produto</label>
+    <input type="text" id="produto" placeholder="Ex: Camiseta, Boné...">
+
+    <label for="valor">Valor</label>
+    <input id="valor" placeholder="Ex: 150.00">
+
+    <label for="quantidade">Quantidade</label>
+    <input id="quantidade" placeholder="Ex: 2">
+
+    <button onclick="enviarPedido()">Enviar Pedido</button>
+
+    <div class="success" id="successBox">Pedido enviado com sucesso!</div>
+</div>
+
+<script>
+    function enviarPedido() {
+        const produto = document.getElementById("produto").value;
+        const valor = document.getElementById("valor").value;
+        const quantidade = document.getElementById("quantidade").value;
+
+        fetch("/orders/enviar-pedido/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ produto, valor, quantidade })
+        })
+        
+        .then(response => response.json())
+        .then(data => {
+
+            document.getElementById("successBox").style.display = "block";
+            setTimeout(() => {
+                document.getElementById("successBox").style.display = "none";
+            }, 2000);
+
+            document.getElementById("produto").value = "";
+            document.getElementById("valor").value = "";
+            document.getElementById("quantidade").value = "";
+        })
+        .catch(error => console.error("Erro:", error));
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== "") {
+            const cookies = document.cookie.split(";");
+            for (let cookie of cookies) {
+                cookie = cookie.trim();
+                if (cookie.startsWith(name + "=")) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+</body>
+</html>

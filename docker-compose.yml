@@ -1,12 +1,6 @@
 version: "3.9"
 
 services:
-  redis:
-    image: redis:7
-    container_name: redis_service
-    ports:
-      - "6379:6379"
-    restart: always
 
   rabbitmq:
     image: rabbitmq:3-management

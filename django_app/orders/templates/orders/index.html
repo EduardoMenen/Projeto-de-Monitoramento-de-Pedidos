@@ -4,43 +4,78 @@
     <meta charset="UTF-8">
     <title>Monitoramento de Pedidos - WebSocket</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
-        h1 { color: #333; }
-        #messages { background: white; padding: 20px; border-radius: 10px; min-height: 200px; margin-bottom: 20px; }
-        input { padding: 10px; width: 300px; }
-        button { padding: 10px 20px; cursor: pointer; }
+        body { 
+          font-family: Arial, sans-serif; 
+          margin: 40px; 
+          background: #f5f5f5; 
+        }
+
+        h1 { 
+          color: #333; 
+        }
+        
+        #messages { 
+          background: white; 
+          padding: 20px; 
+          border-radius: 10px; 
+          min-height: 200px; 
+          margin-bottom: 20px; 
+        }
+
+        .card-pedido {
+          border: 1px solid #ccc;
+          border-radius: 8px;
+          padding: 12px;
+          margin-bottom: 12px;
+          background: #f9f9f9;
+        }
     </style>
 </head>
 <body>
-    <h1>📡 Monitoramento de Pedidos - Teste WebSocket</h1>
+    <h1>📡 Monitoramento de Pedidos</h1>
 
     <div id="messages"></div>
 
-    <input id="messageInput" type="text" placeholder="Digite uma mensagem..." />
-    <button onclick="sendMessage()">Enviar</button>
-
     <script>
-        const socket = new WebSocket('ws://' + window.location.host + '/ws/orders/');
+        let socket;
+        let isConnected = false;
+        let sendQueue = [];
+      
+        function connectSocket() {
+          socket = new WebSocket('ws://' + window.location.host + '/ws/orders/');
+      
+          socket.onopen = function () {
+            console.log('WebSocket aberto');
+            isConnected = true;
+          };
+      
+          socket.onmessage = function (e) {
+            const data = JSON.parse(e.data);
+            const div = document.createElement("div");
+            div.classList.add("card-pedido");
+            div.innerHTML = data.message;
+            document.getElementById("messages").appendChild(div);
+          };
+      
+          socket.onclose = function (e) {
+            console.log('WebSocket fechado, tentando reconectar em 2s', e);
+            isConnected = false;
 
-        socket.onopen = function(e) {
-            console.log('Conectado ao WebSocket');
-            document.getElementById("messages").innerHTML += "<p><strong>Conectado ao servidor WebSocket.</strong></p>";
-    };
-
-    socket.onmessage = function(e) {
-        const data = JSON.parse(e.data);
-        document.getElementById("messages").innerHTML += "<p>" + data.message + "</p>";
-    };
-
-    socket.onclose = function(e) {
-        document.getElementById("messages").innerHTML += "<p><em>Conexão encerrada.</em></p>";
-    };
-
-    function sendMessage() {
-        const input = document.getElementById("messageInput");
-        socket.send(JSON.stringify({ message: input.value }));
-        input.value = '';
-    }
-</script>
+            const div = document.createElement('div');
+            div.classList.add("card-pedido");
+            div.innerHTML = "<em>Conexão encerrada. Tentando reconectar...</em>";
+            document.getElementById("messages").appendChild(div);
+      
+            setTimeout(() => {
+              connectSocket();
+            }, 2000);
+          };
+      
+          socket.onerror = function (err) {
+            console.error('WebSocket erro:', err);
+          };
+        }
+        connectSocket();
+    </script>
 </body>
 </html>
